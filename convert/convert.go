@@ -339,9 +339,9 @@ func String(v interface{}) (string, error) {
 	case uint64:
 		return strconv.FormatUint(t, 10), nil
 	case float32:
-		return strconv.FormatFloat(float64(t), 'E', -1, 32), nil
+		return strconv.FormatFloat(float64(t), 'f', -1, 32), nil
 	case float64:
-		return strconv.FormatFloat(t, 'E', -1, 64), nil
+		return strconv.FormatFloat(t, 'f', -1, 64), nil
 	case string:
 		return t, nil
 	case json.Number:
