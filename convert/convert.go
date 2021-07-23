@@ -73,10 +73,16 @@ func Int(v interface{}) (int, error) {
 			return 0, nil
 		}
 		i, err := strconv.Atoi(t)
-		return i, fmt.Errorf("string to int err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to int err:%w", err)
+		}
+		return i, nil
 	case json.Number:
 		i, err := t.Int64()
-		return int(i), fmt.Errorf("json number to int %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("json number to int %w", err)
+		}
+		return int(i), nil
 	case bool:
 		if t {
 			return 1, nil
@@ -121,10 +127,16 @@ func Int32(v interface{}) (int32, error) {
 			return 0, nil
 		}
 		i, err := strconv.ParseInt(t, 10, 64)
-		return int32(i), fmt.Errorf("string to int32 err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to int32 err:%w", err)
+		}
+		return int32(i), nil
 	case json.Number:
 		i, err := t.Int64()
-		return int32(i), fmt.Errorf("json number to int32 %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("json number to int32 %w", err)
+		}
+		return int32(i), nil
 	case bool:
 		if t {
 			return 1, nil
@@ -169,11 +181,17 @@ func Int64(v interface{}) (int64, error) {
 			return 0, nil
 		}
 		i, err := strconv.ParseInt(t, 10, 64)
-		return i, fmt.Errorf("string to int64 err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to int64 err:%w", err)
+		}
+		return i, nil
 
 	case json.Number:
 		i, err := t.Int64()
-		return i, fmt.Errorf("json number to int64 %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("json number to int64 %w", err)
+		}
+		return i, nil
 
 	case bool:
 		if t {
@@ -219,10 +237,16 @@ func UInt(v interface{}) (uint, error) {
 			return 0, nil
 		}
 		i, err := strconv.Atoi(t)
-		return uint(i), fmt.Errorf("string to uint err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to uint err:%w", err)
+		}
+		return uint(i), nil
 	case json.Number:
 		i, err := t.Int64()
-		return uint(i), fmt.Errorf("json number to uint %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("json number to uint %w", err)
+		}
+		return uint(i), nil
 	case bool:
 		if t {
 			return 1, nil
@@ -267,11 +291,17 @@ func Uint64(v interface{}) (uint64, error) {
 			return 0, nil
 		}
 		i, err := strconv.ParseUint(t, 10, 64)
-		return i, fmt.Errorf("string to uint64 err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to uint64 err:%w", err)
+		}
+		return i, nil
 
 	case json.Number:
 		i, err := t.Int64()
-		return uint64(i), fmt.Errorf("json number to uint64 %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("json number to uint64 %w", err)
+		}
+		return uint64(i), nil
 
 	case bool:
 		if t {
@@ -366,11 +396,17 @@ func Float64(v interface{}) (float64, error) {
 			return 0, nil
 		}
 		f, err := strconv.ParseFloat(t, 64)
-		return f, fmt.Errorf("string to float64 err:%w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to float64 err:%w", err)
+		}
+		return f, nil
 
 	case json.Number:
 		f, err := t.Float64()
-		return f, fmt.Errorf("json number to float64 %w", err)
+		if err != nil {
+			return 0, fmt.Errorf("string to float64 err:%w", err)
+		}
+		return f, nil
 
 	case bool:
 		if t {
