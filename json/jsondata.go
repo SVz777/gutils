@@ -9,16 +9,16 @@
  * @date    2020-05-29
  * @desc
  */
-package maphelper
+package json
 
-type JsonData = map[string]interface{}
+type JData map[string]interface{}
 
-func JDGet(jd JsonData, ks []string) (ret interface{}, ok bool) {
+func JDGet(jd JData, ks []string) (ret interface{}, ok bool) {
 	if len(ks) == 1 {
 		ret, ok = jd[ks[0]]
 	} else {
 		if nx, ok1 := jd[ks[0]]; ok1 {
-			if nxx, ok1 := nx.(JsonData); ok1 {
+			if nxx, ok1 := nx.(JData); ok1 {
 				ret, ok = JDGet(nxx, ks[1:])
 			} else {
 				ret, ok = nx, true
@@ -31,12 +31,12 @@ func JDGet(jd JsonData, ks []string) (ret interface{}, ok bool) {
 	return
 }
 
-func JDSet(jd JsonData, ks []string, value interface{}) bool {
+func JDSet(jd JData, ks []string, value interface{}) bool {
 	if len(ks) == 1 {
 		jd[ks[0]] = value
 	} else {
 		if nx, ok1 := jd[ks[0]]; ok1 {
-			if nxx, ok1 := nx.(JsonData); ok1 {
+			if nxx, ok1 := nx.(JData); ok1 {
 				JDSet(nxx, ks[1:], value)
 			} else {
 				return false
@@ -48,7 +48,7 @@ func JDSet(jd JsonData, ks []string, value interface{}) bool {
 	return true
 }
 
-func JDSetWithFunc(jd JsonData, ks []string, f func(interface{}) (interface{}, bool)) bool {
+func JDSetWithFunc(jd JData, ks []string, f func(interface{}) (interface{}, bool)) bool {
 	if len(ks) == 1 {
 		if v, ok := f(jd[ks[0]]); ok {
 			jd[ks[0]] = v
@@ -57,7 +57,7 @@ func JDSetWithFunc(jd JsonData, ks []string, f func(interface{}) (interface{}, b
 		}
 	} else {
 		if nx, ok1 := jd[ks[0]]; ok1 {
-			if nxx, ok1 := nx.(JsonData); ok1 {
+			if nxx, ok1 := nx.(JData); ok1 {
 				JDSetWithFunc(nxx, ks[1:], f)
 			} else {
 				return false
@@ -70,9 +70,9 @@ func JDSetWithFunc(jd JsonData, ks []string, f func(interface{}) (interface{}, b
 }
 
 // 获取嵌套map，非嵌套map误用
-func JDGetOne(jd JsonData) JsonData {
+func JDGetOne(jd JData) JData {
 	for _, v := range jd {
-		if vv, ok := v.(JsonData); ok {
+		if vv, ok := v.(JData); ok {
 			return vv
 		}
 	}
