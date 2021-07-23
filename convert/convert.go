@@ -13,327 +13,371 @@ package convert
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"strconv"
 )
 
-func Int(v interface{}) (int, bool) {
+func Convert(v interface{}, kind reflect.Kind) (interface{}, error) {
+	switch kind {
+	case reflect.Int:
+		return Int(v)
+	case reflect.Int32:
+		return Int32(v)
+	case reflect.Int64:
+		return Int64(v)
+	case reflect.Uint:
+		return UInt(v)
+	case reflect.Uint64:
+		return Uint64(v)
+	case reflect.String:
+		return String(v)
+	case reflect.Float64:
+		return Float64(v)
+	default:
+		return nil, fmt.Errorf("not support type:%v", kind)
+	}
+}
+
+func Int(v interface{}) (int, error) {
 	if v == nil {
-		return 0, false
+		return 0, fmt.Errorf("v is nil")
 	}
 	switch t := v.(type) {
 	case int:
-		return t, true
+		return t, nil
 	case int8:
-		return int(t), true
+		return int(t), nil
 	case int16:
-		return int(t), true
+		return int(t), nil
 	case int32:
-		return int(t), true
+		return int(t), nil
 	case int64:
-		return int(t), true
+		return int(t), nil
 	case uint:
-		return int(t), true
+		return int(t), nil
 	case uint8:
-		return int(t), true
+		return int(t), nil
 	case uint16:
-		return int(t), true
+		return int(t), nil
 	case uint32:
-		return int(t), true
+		return int(t), nil
 	case uint64:
-		return int(t), true
+		return int(t), nil
 	case float32:
-		return int(t), true
+		return int(t), nil
 	case float64:
-		return int(t), true
+		return int(t), nil
 	case string:
 		if len(t) == 0 {
-			return 0, true
+			return 0, nil
 		}
 		i, err := strconv.Atoi(t)
-		return int(i), err == nil
+		return i, fmt.Errorf("string to int err:%w", err)
 	case json.Number:
 		i, err := t.Int64()
-		return int(i), err == nil
+		return int(i), fmt.Errorf("json number to int %w", err)
 	case bool:
 		if t {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
 	}
-
-	return 0, false
 }
 
-func UInt(v interface{}) (uint, bool) {
+func Int32(v interface{}) (int32, error) {
 	if v == nil {
-		return 0, false
+		return 0, fmt.Errorf("v is nil")
 	}
 	switch t := v.(type) {
 	case int:
-		return uint(t), true
+		return int32(t), nil
 	case int8:
-		return uint(t), true
+		return int32(t), nil
 	case int16:
-		return uint(t), true
+		return int32(t), nil
 	case int32:
-		return uint(t), true
+		return t, nil
 	case int64:
-		return uint(t), true
+		return int32(t), nil
 	case uint:
-		return t, true
+		return int32(t), nil
 	case uint8:
-		return uint(t), true
+		return int32(t), nil
 	case uint16:
-		return uint(t), true
+		return int32(t), nil
 	case uint32:
-		return uint(t), true
+		return int32(t), nil
 	case uint64:
-		return uint(t), true
+		return int32(t), nil
 	case float32:
-		return uint(t), true
+		return int32(t), nil
 	case float64:
-		return uint(t), true
+		return int32(t), nil
 	case string:
 		if len(t) == 0 {
-			return 0, true
+			return 0, nil
+		}
+		i, err := strconv.ParseInt(t, 10, 64)
+		return int32(i), fmt.Errorf("string to int32 err:%w", err)
+	case json.Number:
+		i, err := t.Int64()
+		return int32(i), fmt.Errorf("json number to int32 %w", err)
+	case bool:
+		if t {
+			return 1, nil
+		}
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
+	}
+}
+
+func Int64(v interface{}) (int64, error) {
+	if v == nil {
+		return 0, fmt.Errorf("v is nil")
+	}
+	switch t := v.(type) {
+	case int:
+		return int64(t), nil
+	case int8:
+		return int64(t), nil
+	case int16:
+		return int64(t), nil
+	case int32:
+		return int64(t), nil
+	case int64:
+		return t, nil
+	case uint:
+		return int64(t), nil
+	case uint8:
+		return int64(t), nil
+	case uint16:
+		return int64(t), nil
+	case uint32:
+		return int64(t), nil
+	case uint64:
+		return int64(t), nil
+	case float32:
+		return int64(t), nil
+	case float64:
+		return int64(t), nil
+	case string:
+		if len(t) == 0 {
+			return 0, nil
+		}
+		i, err := strconv.ParseInt(t, 10, 64)
+		return i, fmt.Errorf("string to int64 err:%w", err)
+
+	case json.Number:
+		i, err := t.Int64()
+		return i, fmt.Errorf("json number to int64 %w", err)
+
+	case bool:
+		if t {
+			return 1, nil
+		}
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
+	}
+}
+
+func UInt(v interface{}) (uint, error) {
+	if v == nil {
+		return 0, fmt.Errorf("v is nil")
+	}
+	switch t := v.(type) {
+	case int:
+		return uint(t), nil
+	case int8:
+		return uint(t), nil
+	case int16:
+		return uint(t), nil
+	case int32:
+		return uint(t), nil
+	case int64:
+		return uint(t), nil
+	case uint:
+		return t, nil
+	case uint8:
+		return uint(t), nil
+	case uint16:
+		return uint(t), nil
+	case uint32:
+		return uint(t), nil
+	case uint64:
+		return uint(t), nil
+	case float32:
+		return uint(t), nil
+	case float64:
+		return uint(t), nil
+	case string:
+		if len(t) == 0 {
+			return 0, nil
 		}
 		i, err := strconv.Atoi(t)
-		return uint(i), err == nil
+		return uint(i), fmt.Errorf("string to uint err:%w", err)
 	case json.Number:
 		i, err := t.Int64()
-		return uint(i), err == nil
+		return uint(i), fmt.Errorf("json number to uint %w", err)
 	case bool:
 		if t {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
 	}
-
-	return 0, false
 }
 
-func Int64(v interface{}) (int64, bool) {
+func Uint64(v interface{}) (uint64, error) {
 	if v == nil {
-		return 0, false
+		return 0, fmt.Errorf("v is nil")
 	}
 	switch t := v.(type) {
 	case int:
-		return int64(t), true
+		return uint64(t), nil
 	case int8:
-		return int64(t), true
+		return uint64(t), nil
 	case int16:
-		return int64(t), true
+		return uint64(t), nil
 	case int32:
-		return int64(t), true
+		return uint64(t), nil
 	case int64:
-		return t, true
+		return uint64(t), nil
 	case uint:
-		return int64(t), true
+		return uint64(t), nil
 	case uint8:
-		return int64(t), true
+		return uint64(t), nil
 	case uint16:
-		return int64(t), true
+		return uint64(t), nil
 	case uint32:
-		return int64(t), true
+		return uint64(t), nil
 	case uint64:
-		return int64(t), true
+		return t, nil
 	case float32:
-		return int64(t), true
+		return uint64(t), nil
 	case float64:
-		return int64(t), true
+		return uint64(t), nil
 	case string:
 		if len(t) == 0 {
-			return 0, true
-		}
-		i, err := strconv.ParseInt(t, 10, 64)
-		return i, err == nil
-	case json.Number:
-		i, err := t.Int64()
-		return i, err == nil
-	case bool:
-		if t {
-			return 1, true
-		}
-		return 0, true
-	}
-	return 0, false
-}
-
-func Int32(v interface{}) (int32, bool) {
-	switch t := v.(type) {
-	case int:
-		return int32(t), true
-	case int8:
-		return int32(t), true
-	case int16:
-		return int32(t), true
-	case int32:
-		return t, true
-	case int64:
-		return int32(t), true
-	case uint:
-		return int32(t), true
-	case uint8:
-		return int32(t), true
-	case uint16:
-		return int32(t), true
-	case uint32:
-		return int32(t), true
-	case uint64:
-		return int32(t), true
-	case float32:
-		return int32(t), true
-	case float64:
-		return int32(t), true
-	case string:
-		if len(t) == 0 {
-			return 0, true
-		}
-		i, err := strconv.ParseInt(t, 10, 64)
-		return int32(i), err == nil
-	case json.Number:
-		i, err := t.Int64()
-		return int32(i), err == nil
-	case bool:
-		if t {
-			return 1, true
-		}
-		return 0, true
-	}
-	return 0, false
-}
-
-func Uint64(v interface{}) (uint64, bool) {
-	switch t := v.(type) {
-	case int:
-		return uint64(t), true
-	case int8:
-		return uint64(t), true
-	case int16:
-		return uint64(t), true
-	case int32:
-		return uint64(t), true
-	case int64:
-		return uint64(t), true
-	case uint:
-		return uint64(t), true
-	case uint8:
-		return uint64(t), true
-	case uint16:
-		return uint64(t), true
-	case uint32:
-		return uint64(t), true
-	case uint64:
-		return t, true
-	case float32:
-		return uint64(t), true
-	case float64:
-		return uint64(t), true
-	case string:
-		if len(t) == 0 {
-			return 0, true
+			return 0, nil
 		}
 		i, err := strconv.ParseUint(t, 10, 64)
-		return i, err == nil
+		return i, fmt.Errorf("string to uint64 err:%w", err)
+
 	case json.Number:
 		i, err := t.Int64()
-		return uint64(i), err == nil
+		return uint64(i), fmt.Errorf("json number to uint64 %w", err)
+
 	case bool:
 		if t {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
 	}
-	return 0, false
 }
 
-func String(v interface{}) (string, bool) {
+func String(v interface{}) (string, error) {
+	if v == nil {
+		return "", fmt.Errorf("v is nil")
+	}
 	switch t := v.(type) {
 	case int:
-		return strconv.Itoa(t), true
+		return strconv.Itoa(t), nil
 	case int8:
-		return strconv.FormatInt(int64(t), 10), true
+		return strconv.FormatInt(int64(t), 10), nil
 	case int16:
-		return strconv.FormatInt(int64(t), 10), true
+		return strconv.FormatInt(int64(t), 10), nil
 	case int32:
-		return strconv.FormatInt(int64(t), 10), true
+		return strconv.FormatInt(int64(t), 10), nil
 	case int64:
-		return strconv.FormatInt(t, 10), true
+		return strconv.FormatInt(t, 10), nil
 	case uint:
-		return strconv.FormatUint(uint64(t), 10), true
+		return strconv.FormatUint(uint64(t), 10), nil
 	case uint8:
-		return strconv.FormatUint(uint64(t), 10), true
+		return strconv.FormatUint(uint64(t), 10), nil
 	case uint16:
-		return strconv.FormatUint(uint64(t), 10), true
+		return strconv.FormatUint(uint64(t), 10), nil
 	case uint32:
-		return strconv.FormatUint(uint64(t), 10), true
+		return strconv.FormatUint(uint64(t), 10), nil
 	case uint64:
-		return strconv.FormatUint(t, 10), true
+		return strconv.FormatUint(t, 10), nil
 	case float32:
-		return strconv.FormatFloat(float64(t), 'E', -1, 32), true
+		return strconv.FormatFloat(float64(t), 'E', -1, 32), nil
 	case float64:
-		return strconv.FormatFloat(t, 'E', -1, 64), true
+		return strconv.FormatFloat(t, 'E', -1, 64), nil
 	case string:
-		return t, true
+		return t, nil
 	case json.Number:
-		return t.String(), true
+		return t.String(), nil
 	case bool:
 		if t {
-			return "true", true
+			return "true", nil
 		}
-		return "false", true
+		return "false", nil
 	case map[string]interface{}:
 		if b, err := json.Marshal(t); err != nil {
-			return "", false
+			return "", fmt.Errorf("map to string %w", err)
 		} else {
-			return string(b), true
+			return string(b), nil
 		}
+	default:
+		return "", fmt.Errorf("not support type %#v", v)
 	}
-
-	return "", false
 }
 
-func Float64(v interface{}) (float64, bool) {
+func Float64(v interface{}) (float64, error) {
+	if v == nil {
+		return 0, fmt.Errorf("v is nil")
+	}
 	switch t := v.(type) {
 	case int:
-		return float64(t), true
+		return float64(t), nil
 	case int8:
-		return float64(t), true
+		return float64(t), nil
 	case int16:
-		return float64(t), true
+		return float64(t), nil
 	case int32:
-		return float64(t), true
+		return float64(t), nil
 	case int64:
-		return float64(t), true
+		return float64(t), nil
 	case uint:
-		return float64(t), true
+		return float64(t), nil
 	case uint8:
-		return float64(t), true
+		return float64(t), nil
 	case uint16:
-		return float64(t), true
+		return float64(t), nil
 	case uint32:
-		return float64(t), true
+		return float64(t), nil
 	case uint64:
-		return float64(t), true
+		return float64(t), nil
 	case float32:
-		return float64(t), true
+		return float64(t), nil
 	case float64:
-		return t, true
+		return t, nil
 	case string:
 		if len(t) == 0 {
-			return 0, true
+			return 0, nil
 		}
 		f, err := strconv.ParseFloat(t, 64)
-		return f, err == nil
+		return f, fmt.Errorf("string to float64 err:%w", err)
+
 	case json.Number:
 		f, err := t.Float64()
-		return f, err == nil
+		return f, fmt.Errorf("json number to float64 %w", err)
+
 	case bool:
 		if t {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("not support type %#v", v)
 	}
-
-	return 0, false
 }
