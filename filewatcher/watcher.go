@@ -69,7 +69,7 @@ func (w *watcher) run() {
 				log.Println("file watcher fatal:", err)
 			}
 		}()
-		//all file watchers
+		// all file watchers
 		for {
 			select {
 			case <-time.After(ScanInterval):
@@ -81,7 +81,7 @@ func (w *watcher) run() {
 						continue
 					}
 					if fw.modTime.Before(info.ModTime()) {
-						//修改过
+						// 修改过
 						if err := fw.call(fw.file, Modify); err != nil {
 							log.Println("fw callback error:", err)
 						}
@@ -100,7 +100,7 @@ func (w *watcher) run() {
 				log.Println("dir watcher fatal:", err)
 			}
 		}()
-		//all dir watchers
+		// all dir watchers
 		for {
 			select {
 			case <-time.After(ScanInterval):
@@ -119,10 +119,10 @@ func (w *watcher) run() {
 
 					for _, file := range nowfiles {
 						if modTime, ok := dw.files[file.Name()]; ok {
-							//删除访问过的文件
+							// 删除访问过的文件
 							delete(beforeFiles, file.Name())
 							if modTime.Before(file.ModTime()) {
-								//修改过
+								// 修改过
 								if err := dw.call(file.Name(), Modify); err != nil {
 									log.Println("dw callback error:", err)
 									continue
@@ -140,7 +140,7 @@ func (w *watcher) run() {
 					}
 
 					for file := range beforeFiles {
-						//beforeFiles中都是没访问过的，也就是删除的
+						// beforeFiles中都是没访问过的，也就是删除的
 						if err := dw.call(file, Delete); err != nil {
 							log.Println("dw callback error:", err)
 							continue
@@ -154,4 +154,3 @@ func (w *watcher) run() {
 		}
 	}()
 }
-

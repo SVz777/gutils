@@ -31,12 +31,12 @@ const (
 	ChineseLayoutMD   = "01月02日"
 )
 
-//获取当前时间 YYYY-MM-DD H:i:s
+// 获取当前时间 YYYY-MM-DD H:i:s
 func GetCurrentDateTime() (currentTime string) {
 	return time.Now().Format(LayoutTime)
 }
 
-//获取当前中文时间 YYYY年MM月DD日 H:i:s
+// 获取当前中文时间 YYYY年MM月DD日 H:i:s
 func GetCurrentChineseDateTime() (currentTime string) {
 	return time.Now().Format(ChineseLayoutTime)
 }
@@ -44,19 +44,19 @@ func TimestampToDate(timestamp int64) string {
 	return time.Unix(timestamp, 0).Format(LayoutTime)
 }
 
-//时间戳转换为date，输出指定格式
+// 时间戳转换为date，输出指定格式
 func TimestampToDateWithLayout(timestamp int64, layout string) string {
 	return time.Unix(timestamp, 0).Format(layout)
 }
 
-//获取指定的年月日 YYYY年MM月DD日 ，+/- time
+// 获取指定的年月日 YYYY年MM月DD日 ，+/- time
 func GetDayDateTimeWithExtra(extra string) string {
-	curTime := time.Now() //获取系统当前时间
+	curTime := time.Now() // 获取系统当前时间
 	dh, _ := time.ParseDuration(extra)
 	return curTime.Add(dh).Format(LayoutTimeYMD)
 }
 
-//获取指定的年月日 YYYY年MM月DD日 ，+/- time
+// 获取指定的年月日 YYYY年MM月DD日 ，+/- time
 func GetDayDateTimeWithExtraLayout(extra string, layout string, date string) (string, error) {
 	afterDate, err := time.Parse(LayoutTime, date)
 	if err != nil {

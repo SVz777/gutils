@@ -22,7 +22,7 @@ func Marshal(v interface{}) ([]byte, error) {
 	return bjson.Marshal(v)
 }
 
-//处理json float64精度丢失
+// 处理json float64精度丢失
 func Unmarshal(data []byte, v interface{}) error {
 	decoder := bjson.NewDecoder(bytes.NewReader(data))
 	decoder.UseNumber()

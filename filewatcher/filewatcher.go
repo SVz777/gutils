@@ -43,4 +43,3 @@ func RemoveFileWatcher(file string) {
 	delete(watcherManager.fileWatchers, file)
 	watcherManager.Unlock()
 }
-

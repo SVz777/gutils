@@ -49,4 +49,3 @@ func RemoveDirWatcher(path string) {
 	delete(watcherManager.dirWatchers, path)
 	watcherManager.Unlock()
 }
-
