@@ -223,7 +223,9 @@ func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
 		}
 		busPath := strings.Split(busSrc, ".")
 		jsonValue := j.GetPath(busPath...)
-
+		if jsonValue.IsNil() {
+			continue
+		}
 		value, err := j.getValue(tf.Name, tf.Type, jsonValue)
 		if err != nil {
 			return fmt.Errorf("getvalue error: %w", err)
@@ -240,7 +242,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 	case reflect.Map:
 		v, err := jsonValue.Map()
 		if err != nil {
-			return reflect.Value{}, err
+			return reflect.Value{}, fmt.Errorf("%s parse map err: %w", fieldName, err)
 		}
 		return reflect.ValueOf(v), nil
 	case reflect.Struct:
@@ -248,7 +250,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 		b, _ := jsonValue.MarshalJSON()
 		err := json.Unmarshal(b, trueValue.Interface())
 		if err != nil {
-			return reflect.Value{}, fmt.Errorf("%s json unmarshal err: %w", fieldName, err)
+			return reflect.Value{}, fmt.Errorf("%s parse struct err: %w", fieldName, err)
 		}
 		return trueValue.Elem(), nil
 	case reflect.Slice:
@@ -256,19 +258,19 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 		if itemKind == reflect.Interface {
 			aValue, err := jsonValue.Array()
 			if err != nil {
-				return reflect.Value{}, fmt.Errorf("%s :%w", fieldName, err)
+				return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
 			}
 			return reflect.ValueOf(aValue), nil
 		} else if itemKind == reflect.String {
 			aValue, err := jsonValue.StringArray()
 			if err != nil {
-				return reflect.Value{}, fmt.Errorf("%s :%w", fieldName, err)
+				return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
 			}
 			return reflect.ValueOf(aValue), nil
 		} else {
 			aValue, err := jsonValue.Array()
 			if err != nil {
-				return reflect.Value{}, fmt.Errorf("%s :%w", fieldName, err)
+				return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
 			}
 			trueValue := reflect.MakeSlice(tf, len(aValue), len(aValue))
 			for idx := range aValue {
@@ -283,7 +285,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 	default:
 		iv, err1 := convert.Convert(jsonValue.Interface(), tf.Kind())
 		if err1 != nil {
-			return reflect.Value{}, fmt.Errorf("%s :%w", fieldName, err1)
+			return reflect.Value{}, fmt.Errorf("%s parse default err :%w", fieldName, err1)
 		}
 		return reflect.ValueOf(iv), nil
 	}
