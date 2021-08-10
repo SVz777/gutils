@@ -235,6 +235,8 @@ func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
 
 func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPath) (reflect.Value, error) {
 	switch tf.Kind() {
+	case reflect.Interface:
+		return reflect.ValueOf(jsonValue.Interface()), nil
 	case reflect.Map:
 		v, err := jsonValue.Map()
 		if err != nil {

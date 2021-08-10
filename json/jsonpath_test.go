@@ -8,33 +8,41 @@ import (
 
 func TestNewJSONPath(t *testing.T) {
 	type JS struct {
-		Int          int                    `json:"int" json_path:"int"`
-		Uint         uint                   `json:"uint" json_path:"uint"`
-		Float        float64                `json:"float" json_path:"float"`
-		String       string                 `json:"string" json_path:"string"`
-		Bool         bool                   `json:"bool" json_path:"bool"`
-		IntLevel2    int                    `json:"int_level_2" json_path:"level2.int"`
-		UintLevel2   uint                   `json:"uint_level_2" json_path:"level2.uint"`
-		FloatLevel2  float64                `json:"float_level_2" json_path:"level2.float"`
-		StringLevel2 string                 `json:"string_level_2" json_path:"level2.string"`
-		BoolLevel2   bool                   `json:"bool_level_2" json_path:"level2.bool"`
-		Map          map[string]interface{} `json:"map" json_path:"map"`
-		Array        []interface{}          `json:"array" json_path:"array"`
-		Array2       [][]interface{}        `json:"array2" json_path:"array2"`
-		Array2int    [][]int                `json:"array2int" json_path:"array2"`
-		Array3       [][][]interface{}      `json:"array3" json_path:"array3"`
-		Array3int    [][][]int              `json:"array3int" json_path:"array3"`
-		StringArray  []string               `json:"string_array" json_path:"string_array"`
-		StructArray  []struct {
-			A int     `json:"a"`
-			B string  `json:"b"`
-			C float64 `json:"c"`
-		} `json:"struct_array" json_path:"arraystruct"`
+		Int                int                    `json_path:"int"`
+		IntInterface       interface{}            `json_path:"int"`
+		Uint               uint                   `json_path:"uint"`
+		Float              float64                `json_path:"float"`
+		String             string                 `json_path:"string"`
+		StringInterface    interface{}            `json_path:"string"`
+		Bool               bool                   `json_path:"bool"`
+		IntLevel2          int                    `json_path:"level2.int"`
+		UintLevel2         uint                   `json_path:"level2.uint"`
+		FloatLevel2        float64                `json_path:"level2.float"`
+		StringLevel2       string                 `json_path:"level2.string"`
+		BoolLevel2         bool                   `json_path:"level2.bool"`
+		Map                map[string]interface{} `json_path:"map"`
+		MapInterface       interface{}            `json_path:"map"`
+		Array              []interface{}          `json_path:"array"`
+		ArrayInterface     interface{}            `json_path:"array"`
+		Array2             [][]interface{}        `json_path:"array2"`
+		Array2Interface    interface{}            `json_path:"array2"`
+		Array2int          [][]int                `json_path:"array2"`
+		Array2intInterface interface{}            `json_path:"array2"`
+		Array3             [][][]interface{}      `json_path:"array3"`
+		Array3Interface    interface{}            `json_path:"array3"`
+		Array3int          [][][]int              `json_path:"array3"`
+		Array3intInterface interface{}            `json_path:"array3"`
+		StringArray        []string               `json_path:"string_array"`
+		StructArray        []struct {
+			A int     ``
+			B string  ``
+			C float64 ``
+		} `json_path:"arraystruct"`
 		Struct0 struct {
 			Struct0A int     `json_path:"arraystruct.0.a"`
 			Struct0B string  `json_path:"arraystruct.0.b"`
 			Struct0C float64 `json_path:"arraystruct.0.c"`
-		} `json:"struct0"`
+		}
 	}
 	jp, err := NewJSONPath(
 		[]byte(`
@@ -128,7 +136,6 @@ func TestNewJSONPath(t *testing.T) {
     }
 }`),
 	)
-	js := JS{}
 
 	assert.NotEqual(t, nil, jp)
 	assert.Equal(t, nil, err)
@@ -180,12 +187,16 @@ func TestNewJSONPath(t *testing.T) {
 	gp2, _ := jp.GetPath("level2", "int").Int()
 	assert.Equal(t, 2, gp2)
 
+	// json struct
+	js := JS{}
 	err = jp.ParseWithJSONPath(&js)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, js.Int)
+	assert.Equal(t, Number("1"), js.IntInterface)
 	assert.Equal(t, uint(1), js.Uint)
 	assert.Equal(t, 1.11, js.Float)
 	assert.Equal(t, "jsonpath", js.String)
+	assert.Equal(t, "jsonpath", js.StringInterface)
 	assert.Equal(t, true, js.Bool)
 	assert.Equal(t, 2, js.IntLevel2)
 	assert.Equal(t, uint(2), js.UintLevel2)
@@ -193,25 +204,62 @@ func TestNewJSONPath(t *testing.T) {
 	assert.Equal(t, "jsonpath2", js.StringLevel2)
 	assert.Equal(t, false, js.BoolLevel2)
 	assert.Equal(t, map[string]interface{}{"a": Number("1"), "b": "2", "c": Number("3")}, js.Map)
+	assert.Equal(t, map[string]interface{}{"a": Number("1"), "b": "2", "c": Number("3")}, js.MapInterface)
 	assert.Equal(t, []interface{}{Number("1"), "2", Number("3")}, js.Array)
+	assert.Equal(t, []interface{}{Number("1"), "2", Number("3")}, js.ArrayInterface)
 	assert.Equal(
 		t,
 		[][]interface{}{{Number("1"), Number("2")}, {Number("2"), Number("3")}, {Number("3"), Number("4")}},
 		js.Array2,
 	)
+	assert.Equal(
+		t,
+		[]interface{}{
+			[]interface{}{Number("1"), Number("2")},
+			[]interface{}{Number("2"), Number("3")},
+			[]interface{}{Number("3"), Number("4")},
+		},
+		js.Array2Interface,
+	)
 	assert.Equal(t, [][]int{{1, 2}, {2, 3}, {3, 4}}, js.Array2int)
+	assert.Equal(
+		t,
+		[]interface{}{
+			[]interface{}{Number("1"), Number("2")},
+			[]interface{}{Number("2"), Number("3")},
+			[]interface{}{Number("3"), Number("4")},
+		},
+		js.Array2intInterface,
+	)
 	assert.Equal(
 		t,
 		[][][]interface{}{{{Number("1"), Number("2")}}, {{Number("2"), Number("3")}}, {{Number("3"), Number("4")}}},
 		js.Array3,
 	)
+	assert.Equal(
+		t,
+		[]interface{}{
+			[]interface{}{[]interface{}{Number("1"), Number("2")}},
+			[]interface{}{[]interface{}{Number("2"), Number("3")}},
+			[]interface{}{[]interface{}{Number("3"), Number("4")}},
+		},
+		js.Array3Interface,
+	)
 	assert.Equal(t, [][][]int{{{1, 2}}, {{2, 3}}, {{3, 4}}}, js.Array3int)
+	assert.Equal(
+		t, []interface{}{
+			[]interface{}{[]interface{}{Number("1"), Number("2")}},
+			[]interface{}{[]interface{}{Number("2"), Number("3")}},
+			[]interface{}{[]interface{}{Number("3"), Number("4")}},
+		},
+		js.Array3intInterface,
+	)
 	assert.Equal(t, []string{"asdf", "ghjk", "zxcv"}, js.StringArray)
 	assert.Equal(
 		t, []struct {
-			A int     `json:"a"`
-			B string  `json:"b"`
-			C float64 `json:"c"`
+			A int     ``
+			B string  ``
+			C float64 ``
 		}{
 			{
 				A: 1,
