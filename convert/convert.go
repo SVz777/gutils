@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func Convert(v interface{}, kind reflect.Kind) (interface{}, error) {
@@ -417,5 +418,53 @@ func Float64(v interface{}) (float64, error) {
 		return 0, nil
 	default:
 		return 0, fmt.Errorf("not support type %#v", v)
+	}
+}
+
+func Bool(v interface{}) (bool, error) {
+	if v == nil {
+		return false, fmt.Errorf("v is nil")
+	}
+	switch t := v.(type) {
+	case int:
+		return t != 0, nil
+	case int8:
+		return t != 0, nil
+	case int16:
+		return t != 0, nil
+	case int32:
+		return t != 0, nil
+	case int64:
+		return t != 0, nil
+	case uint:
+		return t != 0, nil
+	case uint8:
+		return t != 0, nil
+	case uint16:
+		return t != 0, nil
+	case uint32:
+		return t != 0, nil
+	case uint64:
+		return t != 0, nil
+	case float32:
+		return t != 0, nil
+	case float64:
+		return t != 0, nil
+	case string:
+		if len(t) == 0 {
+			return false, nil
+		}
+		return strings.ToLower(t) == "true", nil
+
+	case json.Number:
+		f, err := t.Float64()
+		if err != nil {
+			return false, fmt.Errorf("string to float64 err:%w", err)
+		}
+		return f != 0, nil
+	case bool:
+		return t, nil
+	default:
+		return false, fmt.Errorf("not support type %#v", v)
 	}
 }
