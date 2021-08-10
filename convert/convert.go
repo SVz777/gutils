@@ -44,7 +44,7 @@ func Convert(v interface{}, kind reflect.Kind) (interface{}, error) {
 
 func Int(v interface{}) (int, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -98,7 +98,7 @@ func Int(v interface{}) (int, error) {
 
 func Int32(v interface{}) (int32, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -152,7 +152,7 @@ func Int32(v interface{}) (int32, error) {
 
 func Int64(v interface{}) (int64, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -208,7 +208,7 @@ func Int64(v interface{}) (int64, error) {
 
 func Uint(v interface{}) (uint, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -262,7 +262,7 @@ func Uint(v interface{}) (uint, error) {
 
 func Uint64(v interface{}) (uint64, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -318,7 +318,7 @@ func Uint64(v interface{}) (uint64, error) {
 
 func String(v interface{}) (string, error) {
 	if v == nil {
-		return "", fmt.Errorf("v is nil")
+		return "", nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -367,7 +367,7 @@ func String(v interface{}) (string, error) {
 
 func Float64(v interface{}) (float64, error) {
 	if v == nil {
-		return 0, fmt.Errorf("v is nil")
+		return 0, nil
 	}
 	switch t := v.(type) {
 	case int:
@@ -423,7 +423,7 @@ func Float64(v interface{}) (float64, error) {
 
 func Bool(v interface{}) (bool, error) {
 	if v == nil {
-		return false, fmt.Errorf("v is nil")
+		return false, nil
 	}
 	switch t := v.(type) {
 	case int:
