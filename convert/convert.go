@@ -27,13 +27,15 @@ func Convert(v interface{}, kind reflect.Kind) (interface{}, error) {
 	case reflect.Int64:
 		return Int64(v)
 	case reflect.Uint:
-		return UInt(v)
+		return Uint(v)
 	case reflect.Uint64:
 		return Uint64(v)
 	case reflect.String:
 		return String(v)
 	case reflect.Float64:
 		return Float64(v)
+	case reflect.Bool:
+		return Bool(v)
 	default:
 		return nil, fmt.Errorf("not support type:%v", kind)
 	}
