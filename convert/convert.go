@@ -205,7 +205,7 @@ func Int64(v interface{}) (int64, error) {
 	}
 }
 
-func UInt(v interface{}) (uint, error) {
+func Uint(v interface{}) (uint, error) {
 	if v == nil {
 		return 0, fmt.Errorf("v is nil")
 	}
