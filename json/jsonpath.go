@@ -250,6 +250,7 @@ func (j *JSONPath) parseValue(fieldName string, tf reflect.Type, jsonValue *JSON
 		trueValue := reflect.New(tf.Elem())
 		trueValue.Elem().Set(pv)
 		return trueValue, nil
+
 	case reflect.Interface:
 		return reflect.ValueOf(jsonValue.Interface()), nil
 
