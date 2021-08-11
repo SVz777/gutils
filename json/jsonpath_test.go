@@ -9,10 +9,12 @@ import (
 func TestNewJSONPath(t *testing.T) {
 	type JS struct {
 		Int                int                      `json_path:"int"`
+		IntPtr             *int                     `json_path:"int"`
 		IntInterface       interface{}              `json_path:"int"`
 		Uint               uint                     `json_path:"uint"`
 		Float              float64                  `json_path:"float"`
 		String             string                   `json_path:"string"`
+		StringPtr          *string                  `json_path:"string"`
 		StringInterface    interface{}              `json_path:"string"`
 		Bool               bool                     `json_path:"bool"`
 		IntLevel2          int                      `json_path:"level2.int"`
@@ -37,7 +39,22 @@ func TestNewJSONPath(t *testing.T) {
 		Array3int          [][][]int                `json_path:"array3"`
 		Array3intInterface interface{}              `json_path:"array3"`
 		StringArray        []string                 `json_path:"string_array"`
-		StructArray        []struct {
+		Struct             struct {
+			A int
+			B string
+			C float64
+		} `json_path:"struct"`
+		StructPtr *struct {
+			A int
+			B string
+			C float64
+		} `json_path:"struct"`
+		StructPtr2 **struct {
+			A int
+			B string
+			C float64
+		} `json_path:"struct"`
+		StructArray []struct {
 			A int
 			B string
 			C float64
@@ -138,6 +155,11 @@ func TestNewJSONPath(t *testing.T) {
             ]
         ]
     ],
+	"struct": {
+            "a": 1,
+            "b": "1",
+            "c": 1.11
+        },
     "arraystruct": [
         {
             "a": 1,
@@ -215,10 +237,14 @@ func TestNewJSONPath(t *testing.T) {
 	err = jp.ParseWithJSONPath(&js)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, js.Int)
+	ip := 1
+	assert.Equal(t, &ip, js.IntPtr)
 	assert.Equal(t, Number("1"), js.IntInterface)
 	assert.Equal(t, uint(1), js.Uint)
 	assert.Equal(t, 1.11, js.Float)
 	assert.Equal(t, "jsonpath", js.String)
+	strp := "jsonpath"
+	assert.Equal(t, &strp, js.StringPtr)
 	assert.Equal(t, "jsonpath", js.StringInterface)
 	assert.Equal(t, true, js.Bool)
 	assert.Equal(t, 2, js.IntLevel2)
@@ -293,10 +319,44 @@ func TestNewJSONPath(t *testing.T) {
 	)
 	assert.Equal(t, []string{"asdf", "ghjk", "zxcv"}, js.StringArray)
 	assert.Equal(
+		t, struct {
+			A int
+			B string
+			C float64
+		}{
+			A: 1,
+			B: "1",
+			C: 1.11,
+		}, js.Struct,
+	)
+	assert.Equal(
+		t, &struct {
+			A int
+			B string
+			C float64
+		}{
+			A: 1,
+			B: "1",
+			C: 1.11,
+		}, js.StructPtr,
+	)
+	sp := &struct {
+		A int
+		B string
+		C float64
+	}{
+		A: 1,
+		B: "1",
+		C: 1.11,
+	}
+	assert.Equal(
+		t, &sp, js.StructPtr2,
+	)
+	assert.Equal(
 		t, []struct {
-			A int     ``
-			B string  ``
-			C float64 ``
+			A int
+			B string
+			C float64
 		}{
 			{
 				A: 1,

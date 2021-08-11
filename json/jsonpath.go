@@ -195,26 +195,31 @@ func (j *JSONPath) StringArray() ([]string, error) {
 
 // ParseWithJSONPath 根据data的tag(json_path)定义来填充data
 func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
-	tr := reflect.TypeOf(data)
-	if tr.Kind() != reflect.Ptr {
+	vr := reflect.ValueOf(data)
+	if vr.Kind() != reflect.Ptr {
 		// data必须是指针
-		return fmt.Errorf("data must be *struct")
+		return fmt.Errorf("data must be pointer")
 	}
-	tr = tr.Elem()
-	if tr.Kind() != reflect.Struct {
+	vr = vr.Elem()
+	if vr.Kind() != reflect.Struct {
 		// *data必须是结构体
 		return fmt.Errorf("data must be *struct")
 	}
-	vr := reflect.ValueOf(data).Elem()
+	return j.parseWithJSONPath(vr)
+}
 
-	fn := tr.NumField()
+func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	fn := v.NumField()
 	for ii := 0; ii < fn; ii++ {
-		tf := tr.Field(ii)
-		vf := vr.Field(ii)
+		vf := v.Field(ii)
+		tf := v.Type().Field(ii)
 		busSrc := tf.Tag.Get(jsonPathTag)
 		if busSrc == "" {
 			if tf.Type.Kind() == reflect.Struct {
-				err := j.ParseWithJSONPath(vf.Addr().Interface())
+				err := j.parseWithJSONPath(vf)
 				if err != nil {
 					return fmt.Errorf("sub struct %s parse err: %w", tf.Name, err)
 				}
@@ -226,17 +231,25 @@ func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
 		if jsonValue.IsNil() {
 			continue
 		}
-		value, err := j.getValue(tf.Name, tf.Type, jsonValue)
+		value, err := j.getValue(tf.Name, vf.Type(), jsonValue)
 		if err != nil {
 			return fmt.Errorf("getvalue error: %w", err)
 		}
-		vr.Field(ii).Set(value)
+		v.Field(ii).Set(value)
 	}
 	return nil
 }
 
 func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPath) (reflect.Value, error) {
 	switch tf.Kind() {
+	case reflect.Ptr:
+		pv, err := j.getValue(fieldName, tf.Elem(), jsonValue)
+		if err != nil {
+			return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
+		}
+		trueValue := reflect.New(tf.Elem())
+		trueValue.Elem().Set(pv)
+		return trueValue, nil
 	case reflect.Interface:
 		return reflect.ValueOf(jsonValue.Interface()), nil
 
