@@ -72,8 +72,8 @@ func (j *JSONPath) Get2(key interface{}) (*JSONPath, bool) {
 		}
 		return &JSONPath{data: v}, true
 	case []interface{}:
-		k, ok := key.(int)
-		if !ok {
+		k, err := convert.Int(key)
+		if err != nil {
 			return &JSONPath{data: nil}, false
 		}
 		if len(data) <= k {
@@ -195,6 +195,9 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 	for ii := 0; ii < fn; ii++ {
 		vf := v.Field(ii)
 		tf := v.Type().Field(ii)
+		if !vf.CanSet() {
+			return fmt.Errorf("%s can't set", tf.Name)
+		}
 		busSrc := tf.Tag.Get(jsonPathTag)
 		if busSrc == "" {
 			if tf.Type.Kind() == reflect.Struct {
@@ -214,7 +217,11 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 		if err != nil {
 			return fmt.Errorf("getvalue error: %w", err)
 		}
-		v.Field(ii).Set(value)
+
+		if !value.Type().AssignableTo(vf.Type()) {
+			return fmt.Errorf("%s can't %s:%v set error: %w", tf.Name, value.String(), value, err)
+		}
+		vf.Set(value)
 	}
 	return nil
 }
