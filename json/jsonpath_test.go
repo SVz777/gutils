@@ -8,35 +8,39 @@ import (
 
 func TestNewJSONPath(t *testing.T) {
 	type JS struct {
-		Int                int                    `json_path:"int"`
-		IntInterface       interface{}            `json_path:"int"`
-		Uint               uint                   `json_path:"uint"`
-		Float              float64                `json_path:"float"`
-		String             string                 `json_path:"string"`
-		StringInterface    interface{}            `json_path:"string"`
-		Bool               bool                   `json_path:"bool"`
-		IntLevel2          int                    `json_path:"level2.int"`
-		UintLevel2         uint                   `json_path:"level2.uint"`
-		FloatLevel2        float64                `json_path:"level2.float"`
-		StringLevel2       string                 `json_path:"level2.string"`
-		BoolLevel2         bool                   `json_path:"level2.bool"`
-		Map                map[string]interface{} `json_path:"map"`
-		MapInterface       interface{}            `json_path:"map"`
-		Array              []interface{}          `json_path:"array"`
-		ArrayInterface     interface{}            `json_path:"array"`
-		Array2             [][]interface{}        `json_path:"array2"`
-		Array2Interface    interface{}            `json_path:"array2"`
-		Array2int          [][]int                `json_path:"array2"`
-		Array2intInterface interface{}            `json_path:"array2"`
-		Array3             [][][]interface{}      `json_path:"array3"`
-		Array3Interface    interface{}            `json_path:"array3"`
-		Array3int          [][][]int              `json_path:"array3"`
-		Array3intInterface interface{}            `json_path:"array3"`
-		StringArray        []string               `json_path:"string_array"`
+		Int                int                      `json_path:"int"`
+		IntInterface       interface{}              `json_path:"int"`
+		Uint               uint                     `json_path:"uint"`
+		Float              float64                  `json_path:"float"`
+		String             string                   `json_path:"string"`
+		StringInterface    interface{}              `json_path:"string"`
+		Bool               bool                     `json_path:"bool"`
+		IntLevel2          int                      `json_path:"level2.int"`
+		UintLevel2         uint                     `json_path:"level2.uint"`
+		FloatLevel2        float64                  `json_path:"level2.float"`
+		StringLevel2       string                   `json_path:"level2.string"`
+		BoolLevel2         bool                     `json_path:"level2.bool"`
+		Map                map[string]interface{}   `json_path:"map"`
+		StringMap          map[string]string        `json_path:"string_map"`
+		IntMap             map[string]int           `json_path:"int_map"`
+		MapInterface       interface{}              `json_path:"map"`
+		Array              []interface{}            `json_path:"array"`
+		MapArray           []map[string]interface{} `json_path:"map_array"`
+		MapIntArray        []map[string]int         `json_path:"map_int_array"`
+		ArrayInterface     interface{}              `json_path:"array"`
+		Array2             [][]interface{}          `json_path:"array2"`
+		Array2Interface    interface{}              `json_path:"array2"`
+		Array2int          [][]int                  `json_path:"array2"`
+		Array2intInterface interface{}              `json_path:"array2"`
+		Array3             [][][]interface{}        `json_path:"array3"`
+		Array3Interface    interface{}              `json_path:"array3"`
+		Array3int          [][][]int                `json_path:"array3"`
+		Array3intInterface interface{}              `json_path:"array3"`
+		StringArray        []string                 `json_path:"string_array"`
 		StructArray        []struct {
-			A int     ``
-			B string  ``
-			C float64 ``
+			A int
+			B string
+			C float64
 		} `json_path:"arraystruct"`
 		Struct0 struct {
 			Struct0A int     `json_path:"arraystruct.0.a"`
@@ -57,6 +61,16 @@ func TestNewJSONPath(t *testing.T) {
         "b": "2",
         "c": 3
     },
+    "int_map": {
+        "a": 1,
+        "b": 2,
+        "c": 3
+    },
+    "string_map": {
+        "a": "1",
+        "b": "2",
+        "c": "3"
+    },
     "array": [
         1,
         "2",
@@ -72,7 +86,16 @@ func TestNewJSONPath(t *testing.T) {
         null,
         "efg"
     ],
-    "arraywithmap": [
+    "map_array": [
+        {
+            "map11": 1
+        },
+        {
+            "map21": 1,
+            "map22": "2"
+        }
+    ],
+    "map_int_array": [
         {
             "map11": 1
         },
@@ -147,7 +170,7 @@ func TestNewJSONPath(t *testing.T) {
 	_, ok = jp.Get2("missing_key")
 	assert.Equal(t, false, ok)
 
-	awm := jp.Get("arraywithmap")
+	awm := jp.Get("map_array")
 	assert.NotEqual(t, nil, awm)
 	var awsval int
 	awsval, _ = awm.Get(0).Get("map11").Int()
@@ -204,8 +227,22 @@ func TestNewJSONPath(t *testing.T) {
 	assert.Equal(t, "jsonpath2", js.StringLevel2)
 	assert.Equal(t, false, js.BoolLevel2)
 	assert.Equal(t, map[string]interface{}{"a": Number("1"), "b": "2", "c": Number("3")}, js.Map)
+	assert.Equal(t, map[string]string{"a": "1", "b": "2", "c": "3"}, js.StringMap)
+	assert.Equal(t, map[string]int{"a": 1, "b": 2, "c": 3}, js.IntMap)
 	assert.Equal(t, map[string]interface{}{"a": Number("1"), "b": "2", "c": Number("3")}, js.MapInterface)
 	assert.Equal(t, []interface{}{Number("1"), "2", Number("3")}, js.Array)
+	assert.Equal(
+		t, []map[string]interface{}{
+			{"map11": Number("1")},
+			{"map21": Number("1"), "map22": "2"},
+		}, js.MapArray,
+	)
+	assert.Equal(
+		t, []map[string]int{
+			{"map11": 1},
+			{"map21": 1, "map22": 2},
+		}, js.MapIntArray,
+	)
 	assert.Equal(t, []interface{}{Number("1"), "2", Number("3")}, js.ArrayInterface)
 	assert.Equal(
 		t,

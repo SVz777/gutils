@@ -240,11 +240,29 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 	case reflect.Interface:
 		return reflect.ValueOf(jsonValue.Interface()), nil
 	case reflect.Map:
-		v, err := jsonValue.Map()
-		if err != nil {
-			return reflect.Value{}, fmt.Errorf("%s parse map err: %w", fieldName, err)
+		itemKind := tf.Elem().Kind()
+		if itemKind == reflect.Interface {
+			v, err := jsonValue.Map()
+			if err != nil {
+				return reflect.Value{}, fmt.Errorf("%s parse map err: %w", fieldName, err)
+			}
+			return reflect.ValueOf(v), nil
+		} else {
+			mValue, err := jsonValue.Map()
+			if err != nil {
+				return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
+			}
+			trueValue := reflect.MakeMapWithSize(tf, len(mValue))
+			for k := range mValue {
+				iv, err := j.getValue(fieldName, tf.Elem(), jsonValue.Get(k))
+				if err != nil {
+					return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
+				}
+				trueValue.SetMapIndex(reflect.ValueOf(k), iv)
+			}
+			return trueValue, nil
 		}
-		return reflect.ValueOf(v), nil
+
 	case reflect.Struct:
 		trueValue := reflect.New(tf)
 		b, _ := jsonValue.MarshalJSON()
@@ -285,7 +303,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 	default:
 		iv, err1 := convert.Convert(jsonValue.Interface(), tf.Kind())
 		if err1 != nil {
-			return reflect.Value{}, fmt.Errorf("%s parse default err :%w", fieldName, err1)
+			return reflect.Value{}, fmt.Errorf("%s parse default err: %w", fieldName, err1)
 		}
 		return reflect.ValueOf(iv), nil
 	}
