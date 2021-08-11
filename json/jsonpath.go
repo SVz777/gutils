@@ -54,29 +54,8 @@ func (j *JSONPath) IsNil() bool {
 
 // Get 获取key 对应值，不存在 IsNil 为 true
 func (j *JSONPath) Get(key interface{}) *JSONPath {
-	switch data := j.data.(type) {
-	case map[string]interface{}:
-		k, ok := key.(string)
-		if !ok {
-			return &JSONPath{data: nil}
-		}
-		v, ok := data[k]
-		if !ok {
-			return &JSONPath{data: nil}
-		}
-		return &JSONPath{data: v}
-	case []interface{}:
-		k, err := convert.Int(key)
-		if err != nil {
-			return &JSONPath{data: nil}
-		}
-		if len(data) <= k {
-			return &JSONPath{data: nil}
-		}
-		return &JSONPath{data: data[k]}
-	default:
-		return &JSONPath{data: nil}
-	}
+	v, _ := j.Get2(key)
+	return v
 }
 
 // Get2 获取key 对应值，取到了第二个值为true
