@@ -231,7 +231,7 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 		if jsonValue.IsNil() {
 			continue
 		}
-		value, err := j.getValue(tf.Name, vf.Type(), jsonValue)
+		value, err := j.parseValue(tf.Name, vf.Type(), jsonValue)
 		if err != nil {
 			return fmt.Errorf("getvalue error: %w", err)
 		}
@@ -240,10 +240,10 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 	return nil
 }
 
-func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPath) (reflect.Value, error) {
+func (j *JSONPath) parseValue(fieldName string, tf reflect.Type, jsonValue *JSONPath) (reflect.Value, error) {
 	switch tf.Kind() {
 	case reflect.Ptr:
-		pv, err := j.getValue(fieldName, tf.Elem(), jsonValue)
+		pv, err := j.parseValue(fieldName, tf.Elem(), jsonValue)
 		if err != nil {
 			return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
 		}
@@ -268,7 +268,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 			}
 			trueValue := reflect.MakeMapWithSize(tf, len(mValue))
 			for k := range mValue {
-				iv, err := j.getValue(fieldName, tf.Elem(), jsonValue.Get(k))
+				iv, err := j.parseValue(fieldName, tf.Elem(), jsonValue.Get(k))
 				if err != nil {
 					return reflect.Value{}, fmt.Errorf("%s parse map err: %w", fieldName, err)
 				}
@@ -307,7 +307,7 @@ func (j *JSONPath) getValue(fieldName string, tf reflect.Type, jsonValue *JSONPa
 			}
 			trueValue := reflect.MakeSlice(tf, len(aValue), len(aValue))
 			for idx := range aValue {
-				iv, err := j.getValue(fieldName, tf.Elem(), jsonValue.Get(idx))
+				iv, err := j.parseValue(fieldName, tf.Elem(), jsonValue.Get(idx))
 				if err != nil {
 					return reflect.Value{}, fmt.Errorf("%s parse slice err: %w", fieldName, err)
 				}
