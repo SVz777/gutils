@@ -19,54 +19,38 @@ import (
 
 const defaultTaskNum = 4 // 默认任务数，大部分并行任务<=4个
 
-type do func(context.Context) (interface{}, error)
-
-type task struct {
-	f      do
-	result interface{}
-	err    error
-}
-
-func (task *task) GetResult() (ret interface{}) {
-	return task.result
-}
-
-func (task *task) GetErr() (ret error) {
-	return task.err
-}
-
 type TaskManager struct {
 	ctx   context.Context
 	wg    sync.WaitGroup
-	tasks map[string]*task
+	tasks map[string]ITask
 }
 
 func NewTaskManager(ctx context.Context) *TaskManager {
 	return &TaskManager{
 		ctx:   ctx,
 		wg:    sync.WaitGroup{},
-		tasks: make(map[string]*task, defaultTaskNum),
+		tasks: make(map[string]ITask, defaultTaskNum),
 	}
 }
 
-func (tm *TaskManager) Add(key string, f do) {
-	tm.tasks[key] = &task{f: f}
+func (tm *TaskManager) Add(key string, f Do) {
+	tm.tasks[key] = NewTask(tm.ctx, key, f)
 }
 
-func (tm *TaskManager) GetAllTasks() map[string]*task {
+func (tm *TaskManager) GetAllTasks() map[string]ITask {
 	return tm.tasks
 }
 
 func (tm *TaskManager) GetTaskResult(key string) (result interface{}) {
 	if v, ok := tm.tasks[key]; ok {
-		result = v.result
+		result, _ = v.GetResult()
 	}
 	return
 }
 
 func (tm *TaskManager) GetTaskErr(key string) (err error) {
 	if v, ok := tm.tasks[key]; ok {
-		return v.err
+		_, err = v.GetResult()
 	}
 	return
 }
@@ -77,24 +61,27 @@ func (tm *TaskManager) Do() error {
 	}
 	tm.wg.Add(len(tm.tasks))
 	for key, t := range tm.tasks {
-		go func(ctx context.Context, key string, t *task) {
-			defer func() {
-				if p := recover(); p != nil {
-					t.err = fmt.Errorf("task %v err: %v", key, p)
-				}
-			}()
+		go func(ctx context.Context, key string, t ITask) {
 			defer tm.wg.Done()
-			t.result, t.err = t.f(ctx)
+			go t.Do(0)
+			select {
+			case <-t.Done():
+				return
+			case <-ctx.Done():
+				t.SetResult(nil, fmt.Errorf("ctx err: %w", ctx.Err()))
+				return
+			}
 		}(tm.ctx, key, t)
 	}
 	tm.wg.Wait()
 	var err error
 	for key, task := range tm.tasks {
-		if task.err != nil {
+		_, taskErr := task.GetResult()
+		if taskErr != nil {
 			if err == nil {
-				err = fmt.Errorf("[%v:%v]", key, task.err)
+				err = fmt.Errorf("[%v:%v]", key, taskErr)
 			} else {
-				err = fmt.Errorf("[%v:%v]||%w", key, task.err, err)
+				err = fmt.Errorf("[%v:%v]||%w", key, taskErr, err)
 			}
 		}
 	}
