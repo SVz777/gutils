@@ -354,7 +354,7 @@ func String(v interface{}) (string, error) {
 			return "true", nil
 		}
 		return "false", nil
-	case map[string]interface{}:
+	case map[string]interface{}, []interface{}:
 		if b, err := json.Marshal(t); err != nil {
 			return "", fmt.Errorf("map to string %w", err)
 		} else {
