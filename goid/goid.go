@@ -18,6 +18,7 @@ import (
 )
 
 const idLen = 10 + 20 // +支持goid长度
+var offset = 152 //go1.16
 
 func GetGoID() int
 
