@@ -20,16 +20,30 @@ import (
 	"github.com/SVz777/gutils/convert"
 )
 
-const jsonPathTag = "json_path"
+// tag名称
+var jsonPathTag = "json_path"
 
-// JSONPath json的tag封装
-type JSONPath struct {
+// reflect 处理开关
+var reflectSwitch bool
+
+// Path json path的封装
+type Path struct {
 	data interface{}
 }
 
+// RegisterFuzz 修改处理方式
+func RegisterFuzz(s bool) {
+	reflectSwitch = s
+}
+
+// RegisterTag 修改tag名称
+func RegisterTag(name string) {
+	jsonPathTag = name
+}
+
 // NewJSONPath ...
-func NewJSONPath(jsonData []byte) (*JSONPath, error) {
-	j := new(JSONPath)
+func NewJSONPath(jsonData []byte) (*Path, error) {
+	j := new(Path)
 	err := j.UnmarshalJSON(jsonData)
 	if err != nil {
 		return nil, err
@@ -37,56 +51,97 @@ func NewJSONPath(jsonData []byte) (*JSONPath, error) {
 	return j, nil
 }
 
+// NewJSONPathWithData ...
+func NewJSONPathWithData(data interface{}) *Path {
+	return &Path{data: data}
+}
+
 // MarshalJSON json.Marshaler
-func (j *JSONPath) MarshalJSON() ([]byte, error) {
+func (j *Path) MarshalJSON() ([]byte, error) {
 	return Marshal(&j.data)
 }
 
 // UnmarshalJSON json.Unmarshaler
-func (j *JSONPath) UnmarshalJSON(p []byte) error {
+func (j *Path) UnmarshalJSON(p []byte) error {
 	return Unmarshal(p, &j.data)
 }
 
 // IsNil 值是否为空
-func (j *JSONPath) IsNil() bool {
+func (j *Path) IsNil() bool {
 	return j.data == nil
 }
 
 // Get 获取key 对应值，不存在 IsNil 为 true
-func (j *JSONPath) Get(key interface{}) *JSONPath {
+func (j *Path) Get(key interface{}) *Path {
 	v, _ := j.Get2(key)
 	return v
 }
 
 // Get2 获取key 对应值，取到了第二个值为true
-func (j *JSONPath) Get2(key interface{}) (*JSONPath, bool) {
+func (j *Path) Get2(key interface{}) (*Path, bool) {
+	if reflectSwitch {
+		return j.get2Reflect(key)
+	} else {
+		return j.get2Comma(key)
+	}
+}
+
+func (j *Path) get2Comma(key interface{}) (*Path, bool) {
 	switch data := j.data.(type) {
 	case map[string]interface{}:
 		k, ok := key.(string)
 		if !ok {
-			return &JSONPath{data: nil}, false
+			return &Path{data: nil}, false
 		}
 		v, ok := data[k]
 		if !ok {
-			return &JSONPath{data: nil}, false
+			return &Path{data: nil}, false
 		}
-		return &JSONPath{data: v}, true
+		return &Path{data: v}, true
 	case []interface{}:
 		k, err := convert.Int(key)
 		if err != nil {
-			return &JSONPath{data: nil}, false
+			return &Path{data: nil}, false
 		}
 		if len(data) <= k {
-			return &JSONPath{data: nil}, false
+			return &Path{data: nil}, false
 		}
-		return &JSONPath{data: data[k]}, true
+		return &Path{data: data[k]}, true
 	default:
-		return &JSONPath{data: nil}, false
+		return &Path{data: nil}, false
+	}
+}
+
+func (j *Path) get2Reflect(key interface{}) (*Path, bool) {
+	rv := reflect.ValueOf(j.data)
+	switch rv.Kind() {
+	case reflect.Map:
+		k := reflect.ValueOf(key)
+		if rv.Type().Key() != k.Type() {
+			return &Path{data: nil}, false
+		}
+		v := rv.MapIndex(k)
+		if !v.IsValid() {
+			return &Path{data: nil}, false
+		}
+		return &Path{data: v.Interface()}, true
+	case reflect.Slice, reflect.Array:
+		k, err := convert.Int(key)
+		if err != nil {
+			return &Path{data: nil}, false
+		}
+		v := rv.Index(k)
+		if !v.IsValid() {
+			return &Path{data: nil}, false
+		}
+		return &Path{data: v.Interface()}, true
+	default:
+		return &Path{data: nil}, false
 	}
 }
 
 // GetPath 根据path 获取
-func (j *JSONPath) GetPath(path ...string) *JSONPath {
+func (j *Path) GetPath(path ...string) *Path {
 	t := j
 	for _, p := range path {
 		t = t.Get(p)
@@ -94,53 +149,132 @@ func (j *JSONPath) GetPath(path ...string) *JSONPath {
 	return t
 }
 
+// Set 设置值
+func (j *Path) Set(key interface{}, value interface{}) bool {
+	if reflectSwitch {
+		return j.setReflect(key, value)
+	} else {
+		return j.setComma(key, value)
+	}
+}
+
+func (j *Path) setComma(key interface{}, value interface{}) bool {
+	switch data := j.data.(type) {
+	case map[string]interface{}:
+		k, ok := key.(string)
+		if !ok {
+			return false
+		}
+		data[k] = value
+		return true
+	case []interface{}:
+		k, err := convert.Int(key)
+		if err != nil {
+			return false
+		}
+		if k >= len(data) {
+			return false
+		}
+		data[k] = value
+		return true
+	default:
+		return false
+	}
+}
+
+func (j *Path) setReflect(key interface{}, value interface{}) bool {
+	rv := reflect.ValueOf(j.data)
+	rt := rv.Type()
+	switch rv.Kind() {
+	case reflect.Map:
+		k := reflect.ValueOf(key)
+		if rt.Key() != k.Type() {
+			return false
+		}
+		v := reflect.ValueOf(value)
+		if !v.CanConvert(rt.Elem()) {
+			return false
+		}
+		rv.SetMapIndex(k, v)
+		return true
+	case reflect.Slice, reflect.Array:
+		k, err := convert.Int(key)
+		if err != nil {
+			return false
+		}
+		if k >= rv.Len() {
+			return false
+		}
+		v := reflect.ValueOf(value)
+		if !v.CanConvert(rt.Elem()) {
+			return false
+		}
+		rv.Index(k).Set(v)
+		return false
+	default:
+		return false
+	}
+}
+
+// SetPath 根据path设置值
+func (j *Path) SetPath(path []interface{}, value interface{}) bool {
+	if len(path) <= 0 {
+		return false
+	}
+	t := j
+	for _, p := range path[:len(path)-1] {
+		t = t.Get(p)
+	}
+	return t.Set(path[len(path)-1], value)
+}
+
 // Interface 获取data值
-func (j *JSONPath) Interface() interface{} {
+func (j *Path) Interface() interface{} {
 	return j.data
 }
 
 // Int 将值转为 int
-func (j *JSONPath) Int() (int, error) {
+func (j *Path) Int() (int, error) {
 	return convert.Int(j.data)
 }
 
 // Int32 将值转为 int32
-func (j *JSONPath) Int32() (int32, error) {
+func (j *Path) Int32() (int32, error) {
 	return convert.Int32(j.data)
 }
 
 // Int64 将值转为 int64
-func (j *JSONPath) Int64() (int64, error) {
+func (j *Path) Int64() (int64, error) {
 	return convert.Int64(j.data)
 }
 
 // Uint 将值转为 uint
-func (j *JSONPath) Uint() (uint, error) {
+func (j *Path) Uint() (uint, error) {
 	return convert.Uint(j.data)
 }
 
 // UInt64 将值转为 Uint64
-func (j *JSONPath) UInt64() (uint64, error) {
+func (j *Path) UInt64() (uint64, error) {
 	return convert.Uint64(j.data)
 }
 
 // String 将值转为 string
-func (j *JSONPath) String() (string, error) {
+func (j *Path) String() (string, error) {
 	return convert.String(j.data)
 }
 
 // Float64 将值转为 float64
-func (j *JSONPath) Float64() (float64, error) {
+func (j *Path) Float64() (float64, error) {
 	return convert.Float64(j.data)
 }
 
 // Bool 将值转为 bool
-func (j *JSONPath) Bool() (bool, error) {
+func (j *Path) Bool() (bool, error) {
 	return convert.Bool(j.data)
 }
 
 // Map 将值断言为 map[string]interface
-func (j *JSONPath) Map() (map[string]interface{}, error) {
+func (j *Path) Map() (map[string]interface{}, error) {
 	if m, ok := (j.data).(map[string]interface{}); ok {
 		return m, nil
 	}
@@ -148,7 +282,7 @@ func (j *JSONPath) Map() (map[string]interface{}, error) {
 }
 
 // Array 将值断言为 []interface
-func (j *JSONPath) Array() ([]interface{}, error) {
+func (j *Path) Array() ([]interface{}, error) {
 	if a, ok := (j.data).([]interface{}); ok {
 		return a, nil
 	}
@@ -156,7 +290,7 @@ func (j *JSONPath) Array() ([]interface{}, error) {
 }
 
 // StringArray 将值转为 []string
-func (j *JSONPath) StringArray() ([]string, error) {
+func (j *Path) StringArray() ([]string, error) {
 	a, err := j.Array()
 	if err != nil {
 		return nil, err
@@ -173,7 +307,7 @@ func (j *JSONPath) StringArray() ([]string, error) {
 }
 
 // ParseWithJSONPath 根据data的tag(json_path)定义来填充data
-func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
+func (j *Path) ParseWithJSONPath(data interface{}) error {
 	vr := reflect.ValueOf(data)
 	if vr.Kind() != reflect.Ptr {
 		// data必须是指针
@@ -187,7 +321,7 @@ func (j *JSONPath) ParseWithJSONPath(data interface{}) error {
 	return j.parseWithJSONPath(vr)
 }
 
-func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
+func (j *Path) parseWithJSONPath(v reflect.Value) error {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
@@ -200,7 +334,8 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 		}
 		busSrc := tf.Tag.Get(jsonPathTag)
 		if busSrc == "" {
-			if tf.Type.Kind() == reflect.Struct {
+			if tf.Type.Kind() == reflect.Struct ||
+				(vf.Kind() == reflect.Ptr && vf.Type().Elem().Kind() == reflect.Struct) {
 				err := j.parseWithJSONPath(vf)
 				if err != nil {
 					return fmt.Errorf("sub struct %s parse err: %w", tf.Name, err)
@@ -226,7 +361,7 @@ func (j *JSONPath) parseWithJSONPath(v reflect.Value) error {
 	return nil
 }
 
-func (j *JSONPath) parseValue(fieldName string, tf reflect.Type, jsonValue *JSONPath) (reflect.Value, error) {
+func (j *Path) parseValue(fieldName string, tf reflect.Type, jsonValue *Path) (reflect.Value, error) {
 	switch tf.Kind() {
 	case reflect.Ptr:
 		pv, err := j.parseValue(fieldName, tf.Elem(), jsonValue)

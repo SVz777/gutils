@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewJSONPath(t *testing.T) {
+	RegisterFuzz(false)
 	type JS struct {
 		Int                int                      `json_path:"int"`
 		IntPtr             *int                     `json_path:"int"`
@@ -380,4 +381,142 @@ func TestNewJSONPath(t *testing.T) {
 			Struct0C: 1.11,
 		}, js.Struct0,
 	)
+}
+
+func TestNewJSONPathWithData(t *testing.T) {
+	RegisterFuzz(true)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"1": 1,
+			"2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	assert.Equal(t, 1, jp.Get("i").Interface())
+	assert.Equal(t, map[string]interface{}{
+		"1": 1,
+		"2": "m2",
+	}, jp.Get("m").Interface())
+	assert.Equal(t, 1, jp.GetPath("m", "1").Interface())
+	assert.Equal(t, "m2", jp.GetPath("m", "2").Interface())
+	assert.Equal(t, "m2", jp.Get("m").Get("2").Interface())
+	assert.Equal(t, []int{1, 2, 3}, jp.GetPath("s").Interface())
+	assert.Equal(t, 2, jp.GetPath("s", "1").Interface())
+	assert.Equal(t, []interface{}{1, "2", 3}, jp.Get("si").Interface())
+	assert.Equal(t, "2", jp.GetPath("si", "1").Interface())
+}
+
+func TestNewJSONPathSet(t *testing.T) {
+	RegisterFuzz(false)
+	jp, err := NewJSONPath([]byte(`{
+	"i":1,
+	"m":{
+		"1": 1,
+		"2": "m2"
+	},
+	"s":[1,2,3],
+	"si":[1,"2",3]
+}`))
+	assert.Equal(t, nil, err)
+	assert.Equal(t, Number("1"), jp.Get("i").Interface())
+	jp.Set("i", 2)
+	assert.Equal(t, 2, jp.Get("i").Interface())
+	jp.SetPath([]interface{}{"i"}, 3)
+	assert.Equal(t, 3, jp.Get("i").Interface())
+	assert.Equal(t, Number("2"), jp.GetPath("s", "1").Interface())
+	jp.SetPath([]interface{}{"s", "1"}, 4)
+	assert.Equal(t, 4, jp.GetPath("s", "1").Interface())
+	assert.Equal(t, "2", jp.GetPath("si", "1").Interface())
+	jp.SetPath([]interface{}{"si", "1"}, 4)
+	assert.Equal(t, 4, jp.GetPath("si", "1").Interface())
+}
+
+func TestNewJSONPathSetFuzz(t *testing.T) {
+	RegisterFuzz(true)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"1": 1,
+			"2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	assert.Equal(t, 1, jp.Get("i").Interface())
+	jp.Set("i", 2)
+	assert.Equal(t, 2, jp.Get("i").Interface())
+	jp.SetPath([]interface{}{"i"}, 3)
+	assert.Equal(t, 3, jp.Get("i").Interface())
+	assert.Equal(t, 2, jp.GetPath("s", "1").Interface())
+	jp.SetPath([]interface{}{"s", "1"}, 4)
+	assert.Equal(t, 4, jp.GetPath("s", "1").Interface())
+	assert.Equal(t, "2", jp.GetPath("si", "1").Interface())
+	jp.SetPath([]interface{}{"si", "1"}, 4)
+	assert.Equal(t, 4, jp.GetPath("si", "1").Interface())
+}
+
+func BenchmarkJSONPath_getComma(b *testing.B) {
+	RegisterFuzz(false)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"m1": 1,
+			"m2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	for i := 0; i < b.N; i++ {
+		jp.GetPath("si", "1")
+	}
+}
+
+func BenchmarkJSONPath_getReflect(b *testing.B) {
+	RegisterFuzz(true)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"m1": 1,
+			"m2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	for i := 0; i < b.N; i++ {
+		jp.GetPath("si", "1")
+	}
+}
+
+func BenchmarkJSONPath_setComma(b *testing.B) {
+	RegisterFuzz(false)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"m1": 1,
+			"m2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	for i := 0; i < b.N; i++ {
+		jp.SetPath([]interface{}{"si"}, 1)
+	}
+}
+
+func BenchmarkJSONPath_setReflect(b *testing.B) {
+	RegisterFuzz(true)
+	jp := NewJSONPathWithData(map[string]interface{}{
+		"i": 1,
+		"m": map[string]interface{}{
+			"m1": 1,
+			"m2": "m2",
+		},
+		"s":  []int{1, 2, 3},
+		"si": []interface{}{1, "2", 3},
+	})
+	for i := 0; i < b.N; i++ {
+		jp.SetPath([]interface{}{"si"}, 1)
+	}
 }
