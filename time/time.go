@@ -13,8 +13,9 @@ package time
 
 import (
 	"errors"
-	"github.com/SVz777/gutils/convert"
 	"time"
+
+	"github.com/SVz777/gutils/convert"
 )
 
 const (
