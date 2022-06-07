@@ -20,7 +20,7 @@ import (
 )
 
 func TestTaskPool(t *testing.T) {
-	tp := multitask.NewNormalTaskPool(100)
+	tp := multitask.NewTaskPool(multitask.WithCoreNum(100))
 	tks := make([]multitask.ITask, 400)
 	for i := 0; i < 400; i++ {
 		tks[i] = multitask.NewTask(context.WithValue(context.Background(), "id", i), "test", func(ctx context.Context) (interface{}, error) {

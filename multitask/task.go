@@ -27,7 +27,7 @@ type ITask interface {
 	Context() context.Context
 	// GetKey 获取task key
 	GetKey() string
-	// GetResult 设置task 结果
+	// SetResult 设置task 结果
 	SetResult(interface{}, error)
 	// GetResult 获取task 结果
 	GetResult() (interface{}, error)

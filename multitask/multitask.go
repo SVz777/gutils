@@ -17,26 +17,17 @@ import (
 	"sync"
 )
 
-const defaultTaskNum = 4 // 默认任务数，大部分并行任务<=4个
-
 type TaskManager struct {
 	ctx   context.Context
 	wg    sync.WaitGroup
 	tasks map[string]ITask
 }
 
-func NewTaskManager(ctx context.Context, opt ...Option) *TaskManager {
-	opts := &Options{
-		TaskNum: defaultTaskNum,
-	}
-	for _, o := range opt {
-		o(opts)
-	}
-
+func NewTaskManager(ctx context.Context) *TaskManager {
 	return &TaskManager{
 		ctx:   ctx,
 		wg:    sync.WaitGroup{},
-		tasks: make(map[string]ITask, opts.TaskNum),
+		tasks: make(map[string]ITask),
 	}
 }
 

@@ -1,12 +1,25 @@
 package multitask
 
 type Options struct {
-	TaskNum int
+	CoreNum  int
+	HashFunc func(string) int
 }
 type Option func(o *Options)
 
-func WithTaskNum(num int) Option {
+func GetDefaultOptions() *Options {
+	return &Options{
+		CoreNum: 4,
+	}
+}
+
+func WithCoreNum(num int) Option {
 	return func(o *Options) {
-		o.TaskNum = num
+		o.CoreNum = num
+	}
+}
+
+func WithHashFunc(f func(string) int) Option {
+	return func(o *Options) {
+		o.HashFunc = f
 	}
 }
