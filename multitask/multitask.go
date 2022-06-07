@@ -25,11 +25,18 @@ type TaskManager struct {
 	tasks map[string]ITask
 }
 
-func NewTaskManager(ctx context.Context) *TaskManager {
+func NewTaskManager(ctx context.Context, opt ...Option) *TaskManager {
+	opts := &Options{
+		TaskNum: defaultTaskNum,
+	}
+	for _, o := range opt {
+		o(opts)
+	}
+
 	return &TaskManager{
 		ctx:   ctx,
 		wg:    sync.WaitGroup{},
-		tasks: make(map[string]ITask, defaultTaskNum),
+		tasks: make(map[string]ITask, opts.TaskNum),
 	}
 }
 
