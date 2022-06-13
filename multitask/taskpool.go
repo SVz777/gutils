@@ -1,13 +1,3 @@
-/**
- * @file    taskpool.go
- * @author  903943711@qq.com
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * @date    2021/8/23
- * @desc
- */
 package multitask
 
 type ITaskPool interface {

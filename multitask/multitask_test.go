@@ -1,13 +1,3 @@
-/**
- * @file    multitask_test.go
- * @author  903943711@qq.com
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * @date    2021/8/21
- * @desc
- */
 package multitask_test
 
 import (
@@ -16,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bmizerany/assert"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/SVz777/gutils/multitask"
 )

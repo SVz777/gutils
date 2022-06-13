@@ -1,13 +1,5 @@
-/**
- * @file    goid.go
- * @author  903943711@qq.com
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * @date    2021/8/28
- * @desc
- */
+//go:build go1.16 && linux
+
 package goid
 
 import (
@@ -18,7 +10,8 @@ import (
 )
 
 const idLen = 10 + 20 // +支持goid长度
-var offset = 152 //go1.16
+
+var offset = 152 //go1.18
 
 func GetGoID() int
 

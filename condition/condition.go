@@ -1,19 +1,9 @@
-/**
- * @file    Condition.go
- * @author
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * (903943711@qq.com)
- * @date    2020/8/11
- * @desc
- */
 package condition
 
 import (
-	"github.com/SVz777/gutils/convert"
 	"reflect"
+
+	"github.com/SVz777/gutils/convert"
 )
 
 func Equal(a interface{}, b interface{}) bool {

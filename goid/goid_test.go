@@ -1,13 +1,5 @@
-/**
- * @file    goid_test.go
- * @author  903943711@qq.com
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * @date    2021/8/28
- * @desc
- */
+//go:build go1.16 && linux
+
 package goid_test
 
 import (

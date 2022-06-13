@@ -1,14 +1,3 @@
-/**
- * @file    convert.go
- * @author
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * (903943711@qq.com)
- * @date    2020-03-02
- * @desc
- */
 package convert
 
 import (

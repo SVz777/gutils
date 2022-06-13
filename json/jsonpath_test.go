@@ -3,7 +3,7 @@ package json
 import (
 	"testing"
 
-	"github.com/bmizerany/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewJSONPath(t *testing.T) {

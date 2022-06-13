@@ -1,13 +1,3 @@
-/**
- * @file    task.go
- * @author  903943711@qq.com
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * @date    2021/8/24
- * @desc
- */
 package multitask
 
 import (

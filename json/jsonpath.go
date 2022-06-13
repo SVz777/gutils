@@ -1,14 +1,3 @@
-/**
- * @file    jsonpath.go
- * @author
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * (903943711@qq.com)
- * @date    2021-08-10
- * @desc
- */
 package json
 
 import (

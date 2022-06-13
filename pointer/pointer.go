@@ -1,14 +1,3 @@
-/**
- * @file    helper.go
- * @author
- *  ___  _  _  ____
- * / __)( \/ )(_   )
- * \__ \ \  /  / /_
- * (___/  \/  (____)
- * (903943711@qq.com)
- * @date    2020-02-06
- * @desc
- */
 package pointer
 
 func IntPtr(i int) *int {
