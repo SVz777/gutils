@@ -2,33 +2,6 @@ package set
 
 import "github.com/SVz777/gutils/collections"
 
-type Set map[string]collections.Empty
-
-func NewSet(keys ...string) Set {
-	s := make(Set, len(keys))
-	for _, key := range keys {
-		s.Add(key)
-	}
-	return s
-}
-func (s Set) AllItems() []string {
-	keys := make([]string, 0, len(s))
-	for k := range s {
-		keys = append(keys, k)
-	}
-	return keys
-}
-func (s Set) IsContain(key string) bool {
-	_, ok := s[key]
-	return ok
-}
-func (s Set) Add(key string) {
-	s[key] = collections.Empty{}
-}
-func (s Set) Delete(key string) {
-	delete(s, key)
-}
-
 type IntSet map[int]collections.Empty
 
 func NewIntSet(keys ...int) IntSet {
