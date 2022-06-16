@@ -6,7 +6,7 @@ import (
 	"github.com/SVz777/gutils/collections/set"
 )
 
-func Union(arrs ...[]int64) []int64 {
+func ArrayUnion(arrs ...[]int64) []int64 {
 	if len(arrs) == 0 {
 		return nil
 	} else if len(arrs) == 1 {
@@ -21,7 +21,7 @@ func Union(arrs ...[]int64) []int64 {
 	return values.AllItems()
 }
 
-func Inter(arrs ...[]int64) []int64 {
+func ArrayInter(arrs ...[]int64) []int64 {
 	if len(arrs) == 0 {
 		return nil
 	} else if len(arrs) == 1 {
@@ -39,7 +39,7 @@ func Inter(arrs ...[]int64) []int64 {
 	return values.AllItems()
 }
 
-func InArray(v interface{}, arr interface{}) bool {
+func ArrayInArray(v interface{}, arr interface{}) bool {
 	vValue, arrValue := reflect.ValueOf(v), reflect.ValueOf(arr)
 	if arrValue.Kind() != reflect.Slice && arrValue.Kind() != reflect.Array {
 		return false
