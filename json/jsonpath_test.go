@@ -7,7 +7,6 @@ import (
 )
 
 func TestNewJSONPath(t *testing.T) {
-	RegisterFuzz(false)
 	type JS struct {
 		Int                int                      `json_path:"int"`
 		IntPtr             *int                     `json_path:"int"`
@@ -384,7 +383,6 @@ func TestNewJSONPath(t *testing.T) {
 }
 
 func TestNewJSONPathWithData(t *testing.T) {
-	RegisterFuzz(true)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -393,7 +391,7 @@ func TestNewJSONPathWithData(t *testing.T) {
 		},
 		"s":  []int{1, 2, 3},
 		"si": []interface{}{1, "2", 3},
-	})
+	}, WithReflectSwitch(true))
 	assert.Equal(t, 1, jp.Get("i").Interface())
 	assert.Equal(t, map[string]interface{}{
 		"1": 1,
@@ -409,7 +407,6 @@ func TestNewJSONPathWithData(t *testing.T) {
 }
 
 func TestNewJSONPathSet(t *testing.T) {
-	RegisterFuzz(false)
 	jp, err := NewJSONPath([]byte(`{
 	"i":1,
 	"m":{
@@ -434,7 +431,6 @@ func TestNewJSONPathSet(t *testing.T) {
 }
 
 func TestNewJSONPathSetFuzz(t *testing.T) {
-	RegisterFuzz(true)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -443,7 +439,7 @@ func TestNewJSONPathSetFuzz(t *testing.T) {
 		},
 		"s":  []int{1, 2, 3},
 		"si": []interface{}{1, "2", 3},
-	})
+	}, WithReflectSwitch(true))
 	assert.Equal(t, 1, jp.Get("i").Interface())
 	jp.Set("i", 2)
 	assert.Equal(t, 2, jp.Get("i").Interface())
@@ -458,7 +454,6 @@ func TestNewJSONPathSetFuzz(t *testing.T) {
 }
 
 func BenchmarkJSONPath_getComma(b *testing.B) {
-	RegisterFuzz(false)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -474,7 +469,6 @@ func BenchmarkJSONPath_getComma(b *testing.B) {
 }
 
 func BenchmarkJSONPath_getReflect(b *testing.B) {
-	RegisterFuzz(true)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -483,14 +477,13 @@ func BenchmarkJSONPath_getReflect(b *testing.B) {
 		},
 		"s":  []int{1, 2, 3},
 		"si": []interface{}{1, "2", 3},
-	})
+	}, WithReflectSwitch(true))
 	for i := 0; i < b.N; i++ {
 		jp.GetPath("si", "1")
 	}
 }
 
 func BenchmarkJSONPath_setComma(b *testing.B) {
-	RegisterFuzz(false)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -506,7 +499,6 @@ func BenchmarkJSONPath_setComma(b *testing.B) {
 }
 
 func BenchmarkJSONPath_setReflect(b *testing.B) {
-	RegisterFuzz(true)
 	jp := NewJSONPathWithData(map[string]interface{}{
 		"i": 1,
 		"m": map[string]interface{}{
@@ -515,7 +507,7 @@ func BenchmarkJSONPath_setReflect(b *testing.B) {
 		},
 		"s":  []int{1, 2, 3},
 		"si": []interface{}{1, "2", 3},
-	})
+	}, WithReflectSwitch(true))
 	for i := 0; i < b.N; i++ {
 		jp.SetPath([]interface{}{"si"}, 1)
 	}

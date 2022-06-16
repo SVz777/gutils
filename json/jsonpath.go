@@ -9,30 +9,18 @@ import (
 	"github.com/SVz777/gutils/convert"
 )
 
-// tag名称
-var jsonPathTag = "json_path"
-
-// reflect 处理开关
-var reflectSwitch bool
-
 // Path json path的封装
 type Path struct {
+	opts *Options
 	data interface{}
 }
 
-// RegisterFuzz 修改处理方式
-func RegisterFuzz(s bool) {
-	reflectSwitch = s
-}
-
-// RegisterTag 修改tag名称
-func RegisterTag(name string) {
-	jsonPathTag = name
-}
-
 // NewJSONPath ...
-func NewJSONPath(jsonData []byte) (*Path, error) {
-	j := new(Path)
+func NewJSONPath(jsonData []byte, opt ...Option) (*Path, error) {
+	opts := GetOptions(opt...)
+	j := &Path{
+		opts: opts,
+	}
 	err := j.UnmarshalJSON(jsonData)
 	if err != nil {
 		return nil, err
@@ -41,8 +29,11 @@ func NewJSONPath(jsonData []byte) (*Path, error) {
 }
 
 // NewJSONPathWithData ...
-func NewJSONPathWithData(data interface{}) *Path {
-	return &Path{data: data}
+func NewJSONPathWithData(data interface{}, opt ...Option) *Path {
+	return &Path{
+		opts: GetOptions(opt...),
+		data: data,
+	}
 }
 
 // MarshalJSON json.Marshaler
@@ -60,6 +51,14 @@ func (j *Path) IsNil() bool {
 	return j.data == nil
 }
 
+// genNew 生成一份新的只修改 data
+func (j *Path) genNew(data interface{}) *Path {
+	return &Path{
+		opts: j.opts,
+		data: data,
+	}
+}
+
 // Get 获取key 对应值，不存在 IsNil 为 true
 func (j *Path) Get(key interface{}) *Path {
 	v, _ := j.Get2(key)
@@ -68,7 +67,7 @@ func (j *Path) Get(key interface{}) *Path {
 
 // Get2 获取key 对应值，取到了第二个值为true
 func (j *Path) Get2(key interface{}) (*Path, bool) {
-	if reflectSwitch {
+	if j.opts.ReflectSwitch {
 		return j.get2Reflect(key)
 	} else {
 		return j.get2Comma(key)
@@ -80,24 +79,24 @@ func (j *Path) get2Comma(key interface{}) (*Path, bool) {
 	case map[string]interface{}:
 		k, ok := key.(string)
 		if !ok {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
 		v, ok := data[k]
 		if !ok {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
-		return &Path{data: v}, true
+		return j.genNew(v), true
 	case []interface{}:
 		k, err := convert.Int(key)
 		if err != nil {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
 		if len(data) <= k {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
-		return &Path{data: data[k]}, true
+		return j.genNew(data[k]), true
 	default:
-		return &Path{data: nil}, false
+		return j.genNew(nil), false
 	}
 }
 
@@ -107,25 +106,25 @@ func (j *Path) get2Reflect(key interface{}) (*Path, bool) {
 	case reflect.Map:
 		k := reflect.ValueOf(key)
 		if rv.Type().Key() != k.Type() {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
 		v := rv.MapIndex(k)
 		if !v.IsValid() {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
-		return &Path{data: v.Interface()}, true
+		return j.genNew(v.Interface()), true
 	case reflect.Slice, reflect.Array:
 		k, err := convert.Int(key)
 		if err != nil {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
 		v := rv.Index(k)
 		if !v.IsValid() {
-			return &Path{data: nil}, false
+			return j.genNew(nil), false
 		}
-		return &Path{data: v.Interface()}, true
+		return j.genNew(v.Interface()), true
 	default:
-		return &Path{data: nil}, false
+		return j.genNew(nil), false
 	}
 }
 
@@ -140,7 +139,7 @@ func (j *Path) GetPath(path ...string) *Path {
 
 // Set 设置值
 func (j *Path) Set(key interface{}, value interface{}) bool {
-	if reflectSwitch {
+	if j.opts.ReflectSwitch {
 		return j.setReflect(key, value)
 	} else {
 		return j.setComma(key, value)
@@ -321,7 +320,7 @@ func (j *Path) parseWithJSONPath(v reflect.Value) error {
 		if !vf.CanSet() {
 			return fmt.Errorf("%s can't set", tf.Name)
 		}
-		busSrc := tf.Tag.Get(jsonPathTag)
+		busSrc := tf.Tag.Get(j.opts.Tag)
 		if busSrc == "" {
 			if tf.Type.Kind() == reflect.Struct ||
 				(vf.Kind() == reflect.Ptr && vf.Type().Elem().Kind() == reflect.Struct) {
