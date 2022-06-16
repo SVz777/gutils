@@ -2,7 +2,7 @@ package maphelper
 
 import "github.com/SVz777/gutils/json"
 
-func MapFlip(src map[string]string) map[string]string {
+func Flip(src map[string]string) map[string]string {
 	newMap := make(map[string]string, len(src))
 	for k, v := range src {
 		newMap[v] = k
@@ -10,7 +10,7 @@ func MapFlip(src map[string]string) map[string]string {
 	return newMap
 }
 
-func MapCopy(src map[string]string) map[string]string {
+func Copy(src map[string]string) map[string]string {
 	newMap := make(map[string]string, len(src))
 	for k, v := range src {
 		newMap[k] = v
@@ -25,7 +25,7 @@ func StructToMap(obj interface{}) map[string]interface{} {
 	return data
 }
 
-func MapCopyInterface(src map[string]interface{}) map[string]interface{} {
+func CopyInterface(src map[string]interface{}) map[string]interface{} {
 	newMap := make(map[string]interface{}, len(src))
 	for k, v := range src {
 		newMap[k] = v

@@ -67,7 +67,7 @@ func (dw *dirWatcher) watch() {
 		log.Println("dw read path error:", err)
 		return
 	}
-	beforeFiles := set.Set{}
+	beforeFiles := set.NewSet()
 	for file := range dw.files {
 		beforeFiles.Add(file)
 	}

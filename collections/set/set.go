@@ -2,6 +2,34 @@ package set
 
 import "github.com/SVz777/gutils/collections"
 
+type Set map[string]collections.Empty
+
+func NewSet(keys ...string) Set {
+	s := make(Set, len(keys))
+	for _, key := range keys {
+		s.Add(key)
+	}
+	return s
+}
+func (s Set) AllItems() []string {
+	keys := make([]string, 0, len(s))
+	for k := range s {
+		keys = append(keys, k)
+	}
+	return keys
+}
+func (s Set) IsContain(key string) bool {
+	_, ok := s[key]
+	return ok
+}
+func (s Set) Add(key string) {
+	s[key] = collections.Empty{}
+
+}
+func (s Set) Delete(key string) {
+	delete(s, key)
+}
+
 type IntSet map[int]collections.Empty
 
 func NewIntSet(keys ...int) IntSet {
@@ -139,33 +167,5 @@ func (s Uint64Set) Add(key uint64) {
 
 }
 func (s Uint64Set) Delete(key uint64) {
-	delete(s, key)
-}
-
-type StringSet map[string]collections.Empty
-
-func NewStringSet(keys ...string) StringSet {
-	s := make(StringSet, len(keys))
-	for _, key := range keys {
-		s.Add(key)
-	}
-	return s
-}
-func (s StringSet) AllItems() []string {
-	keys := make([]string, 0, len(s))
-	for k := range s {
-		keys = append(keys, k)
-	}
-	return keys
-}
-func (s StringSet) IsContain(key string) bool {
-	_, ok := s[key]
-	return ok
-}
-func (s StringSet) Add(key string) {
-	s[key] = collections.Empty{}
-
-}
-func (s StringSet) Delete(key string) {
 	delete(s, key)
 }

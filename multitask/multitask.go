@@ -6,43 +6,43 @@ import (
 	"sync"
 )
 
-type TaskManager struct {
+type taskManager struct {
 	ctx   context.Context
 	wg    sync.WaitGroup
 	tasks map[string]ITask
 }
 
-func NewTaskManager(ctx context.Context) *TaskManager {
-	return &TaskManager{
+func NewTaskManager(ctx context.Context) *taskManager {
+	return &taskManager{
 		ctx:   ctx,
 		wg:    sync.WaitGroup{},
 		tasks: make(map[string]ITask),
 	}
 }
 
-func (tm *TaskManager) Add(key string, f Do) {
+func (tm *taskManager) Add(key string, f Do) {
 	tm.tasks[key] = NewTask(tm.ctx, key, f)
 }
 
-func (tm *TaskManager) GetAllTasks() map[string]ITask {
+func (tm *taskManager) GetAllTasks() map[string]ITask {
 	return tm.tasks
 }
 
-func (tm *TaskManager) GetTaskResult(key string) (result interface{}) {
+func (tm *taskManager) GetTaskResult(key string) (result interface{}) {
 	if v, ok := tm.tasks[key]; ok {
 		result, _ = v.GetResult()
 	}
 	return
 }
 
-func (tm *TaskManager) GetTaskErr(key string) (err error) {
+func (tm *taskManager) GetTaskErr(key string) (err error) {
 	if v, ok := tm.tasks[key]; ok {
 		_, err = v.GetResult()
 	}
 	return
 }
 
-func (tm *TaskManager) Do() error {
+func (tm *taskManager) Do() error {
 	if len(tm.tasks) <= 0 {
 		return nil
 	}
